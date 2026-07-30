@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Leave a message — Emmanuel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F9;
+    --ink:#0F1826;
+    --muted:#5B6B7F;
+    --panel:#101418;
+    --amber:#FFB000;
+    --line:#D7DEE7;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+    min-height:100dvh;
+    display:flex;justify-content:center;
+    padding:28px 20px 48px;
+  }
+  main{width:100%;max-width:420px}
+
+  .eyebrow{
+    font:500 12px/1 "IBM Plex Mono",monospace;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  h1{
+    font-family:"Space Grotesk",system-ui,sans-serif;
+    font-weight:700;font-size:clamp(30px,9vw,38px);
+    letter-spacing:-.02em;line-height:1.05;
+    margin:10px 0 6px;
+  }
+  .role{color:var(--muted);font-size:15px;margin-bottom:22px}
+
+  /* Signature: telemetry status strip */
+  .status{
+    background:var(--panel);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:26px;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .status .label{
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:#6E7A87;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--amber);flex-shrink:0;
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media (prefers-reduced-motion:reduce){.dot{animation:none}}
+  .status .text{color:var(--amber);font-size:16px;font-weight:500}
+  .status .note{color:#B8C2CC;font-size:13px;margin-top:4px}
+  .status .age{color:#6E7A87;font-size:11px;margin-top:10px}
+
+  /* Express button */
+  .express{
+    display:block;width:100%;
+    background:var(--amber);color:var(--ink);
+    border:none;border-radius:var(--radius);
+    padding:18px 20px;
+    font:700 17px/1.2 "Space Grotesk",system-ui,sans-serif;
+    text-align:left;cursor:pointer;
+    text-decoration:none;
+    margin-bottom:10px;
+  }
+  .express small{
+    display:block;font:400 13px/1.4 system-ui,sans-serif;
+    margin-top:3px;opacity:.75;
+  }
+  .express:active{transform:scale(.985)}
+
+  /* Channel buttons */
+  #channels{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .divider{
+    font:500 11px/1 "IBM Plex Mono",monospace;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:14px 0 0;
+  }
+  .channel{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    color:var(--ink);text-decoration:none;
+  }
+  .channel:active{background:#EDF1F6}
+  .channel .name{font-weight:600;font-size:16px}
+  .channel .hint{color:var(--muted);font-size:13px;margin-top:2px}
+  .channel .arrow{color:var(--muted);font-size:18px;flex-shrink:0;margin-left:12px}
+
+  footer{
+    margin-top:34px;padding-top:18px;
+    border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:13px;color:var(--muted);
+  }
+  footer a{color:var(--ink);font-weight:600;text-decoration:none}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow" id="room">Room 000 · IPAC</p>
+  <h1 id="name">Emmanuel</h1>
+  <p class="role" id="role">Not in? Leave a message below.</p>
+
+  <div class="status" id="status" hidden>
+    <div class="label"><span class="dot"></span>Status</div>
+    <div class="text" id="statusText"></div>
+    <div class="note" id="statusNote" hidden></div>
+    <div class="age" id="statusAge"></div>
+  </div>
+
+  <a class="express" id="express" href="#">
+    I stopped by
+    <small>One tap — opens a pre-filled email with the current time. Just hit send.</small>
+  </a>
+
+  <p class="divider">Or pick a channel</p>
+  <div id="channels"></div>
+
+  <footer>
+    <a id="vcard" href="contact.vcf" download>Save my contact</a>
+    <span>Scanned from my door sign</span>
+  </footer>
+</main>
+
+<script>
+// AIDEV-NOTE: single source of truth for personal links — edit here only.
+const CONFIG = {
+  name: "Emmanuel",                       // display name
+  room: "Room 000 · IPAC",                // door label
+  email: "YOUR_EMAIL@ipac.caltech.edu",   // work email
+  slackTeamId: "TXXXXXXXX",               // Slack workspace team ID
+  slackUserId: "UXXXXXXXX",               // your Slack member ID
+  schedulerUrl: "https://YOUR_SCHEDULER_LINK", // Zoom/Google appointment page
+  workHours: { start: 9, end: 17 }        // local hours when Slack ranks first
+};
+
+document.getElementById("name").textContent = CONFIG.name;
+document.getElementById("room").textContent = CONFIG.room;
+
+// --- Express "I stopped by" mailto, time inserted at tap time ---
+document.getElementById("express").addEventListener("click", function (e) {
+  const now = new Date();
+  const t = now.toLocaleString(undefined, {
+    weekday: "short", hour: "2-digit", minute: "2-digit"
+  });
+  const subject = encodeURIComponent(`At your door — ${t}`);
+  const body = encodeURIComponent(
+    `Hi ${CONFIG.name},\n\nI stopped by your office at ${t}.\n\nMessage: \n\n— `
+  );
+  this.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
+});
+
+// --- Channels, reordered by time of day ---
+const channels = [
+  {
+    id: "slack",
+    name: "Slack DM",
+    hint: "Fastest during work hours (IPAC workspace)",
+    href: `https://slack.com/app_redirect?team=${CONFIG.slackTeamId}&channel=${CONFIG.slackUserId}`
+  },
+  {
+    id: "email",
+    name: "Email",
+    hint: "Anything longer, or if you don't use Slack",
+    href: `mailto:${CONFIG.email}?subject=${encodeURIComponent("From your door sign")}`
+  },
+  {
+    id: "meet",
+    name: "Book a meeting",
+    hint: "Pick a slot on my calendar",
+    href: CONFIG.schedulerUrl
+  }
+];
+
+const h = new Date().getHours();
+const d = new Date().getDay();
+const workNow = d >= 1 && d <= 5 && h >= CONFIG.workHours.start && h < CONFIG.workHours.end;
+// AIDEV-NOTE: outside work hours, email outranks Slack (visitor likely external / I won't see Slack)
+if (!workNow) channels.sort((a, b) => (a.id === "email" ? -1 : b.id === "email" ? 1 : 0));
+
+document.getElementById("channels").innerHTML = channels.map(c => `
+  <a class="channel" href="${c.href}" target="_blank" rel="noopener">
+    <span><span class="name">${c.name}</span><br><span class="hint">${c.hint}</span></span>
+    <span class="arrow">→</span>
+  </a>`).join("");
+
+// --- Live status from status.json (same origin, cache-busted) ---
+fetch(`status.json?t=${Date.now()}`)
+  .then(r => (r.ok ? r.json() : Promise.reject()))
+  .then(s => {
+    if (!s.status) return;
+    document.getElementById("statusText").textContent = s.status;
+    if (s.note) {
+      const n = document.getElementById("statusNote");
+      n.textContent = s.note;
+      n.hidden = false;
+    }
+    if (s.updated) {
+      const mins = Math.round((Date.now() - new Date(s.updated)) / 60000);
+      const age = mins < 60 ? `${mins} min ago`
+        : mins < 1440 ? `${Math.round(mins / 60)} h ago`
+        : `${Math.round(mins / 1440)} d ago`;
+      document.getElementById("statusAge").textContent = `updated ${age}`;
+    }
+    document.getElementById("status").hidden = false;
+  })
+  .catch(() => { /* no status file — strip stays hidden */ });
+</script>
+</body>
+</html>
