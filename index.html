@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Leave a message — Emmanuel</title>
+<title>Leave a note — Emmanuel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,215 +15,288 @@
     --muted:#5B6B7F;
     --panel:#101418;
     --amber:#FFB000;
+    --sticky:#FFD34D;
     --line:#D7DEE7;
+    --door:#1B2B45;
+    --door-panel:#223552;
     --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{
-    background:var(--paper);
-    color:var(--ink);
+    background:var(--paper);color:var(--ink);
     font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
-    min-height:100dvh;
-    display:flex;justify-content:center;
-    padding:28px 20px 48px;
+    min-height:100dvh;display:flex;justify-content:center;
+    padding:24px 18px 48px;
   }
   main{width:100%;max-width:420px}
+  .eyebrow{font:500 12px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;font-size:clamp(28px,8vw,34px);letter-spacing:-.02em;line-height:1.05;margin:8px 0 18px}
 
-  .eyebrow{
-    font:500 12px/1 "IBM Plex Mono",monospace;
-    letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);
-  }
-  h1{
-    font-family:"Space Grotesk",system-ui,sans-serif;
-    font-weight:700;font-size:clamp(30px,9vw,38px);
-    letter-spacing:-.02em;line-height:1.05;
-    margin:10px 0 6px;
-  }
-  .role{color:var(--muted);font-size:15px;margin-bottom:22px}
-
-  /* Signature: telemetry status strip */
-  .status{
-    background:var(--panel);
-    border-radius:var(--radius);
-    padding:16px 18px;
-    margin-bottom:26px;
-    font-family:"IBM Plex Mono",monospace;
-  }
-  .status .label{
-    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-    color:#6E7A87;margin-bottom:8px;
-    display:flex;align-items:center;gap:8px;
-  }
-  .dot{
-    width:8px;height:8px;border-radius:50%;
-    background:var(--amber);flex-shrink:0;
-    animation:pulse 2.2s ease-in-out infinite;
-  }
+  /* Status strip (compact) */
+  .status{background:var(--panel);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-family:"IBM Plex Mono",monospace;display:none}
+  .status.on{display:block}
+  .status .row{display:flex;align-items:center;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:pulse 2.2s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  @media (prefers-reduced-motion:reduce){.dot{animation:none}}
-  .status .text{color:var(--amber);font-size:16px;font-weight:500}
-  .status .note{color:#B8C2CC;font-size:13px;margin-top:4px}
-  .status .age{color:#6E7A87;font-size:11px;margin-top:10px}
+  @media (prefers-reduced-motion:reduce){.dot,.sticky.new{animation:none}}
+  .status .text{color:var(--amber);font-size:14px;font-weight:500}
+  .status .age{color:#6E7A87;font-size:11px;margin-top:4px;padding-left:16px}
 
-  /* Express button */
-  .express{
-    display:block;width:100%;
-    background:var(--amber);color:var(--ink);
-    border:none;border-radius:var(--radius);
-    padding:18px 20px;
-    font:700 17px/1.2 "Space Grotesk",system-ui,sans-serif;
-    text-align:left;cursor:pointer;
-    text-decoration:none;
-    margin-bottom:10px;
+  /* The door */
+  .doorwrap{display:flex;justify-content:center;margin-bottom:14px}
+  .door{
+    position:relative;width:min(320px,86vw);aspect-ratio:2/3;
+    background:linear-gradient(160deg,var(--door),#16233A);
+    border-radius:10px 10px 4px 4px;
+    box-shadow:0 18px 40px -18px rgba(15,24,38,.45), inset 0 0 0 6px rgba(255,255,255,.04);
   }
-  .express small{
-    display:block;font:400 13px/1.4 system-ui,sans-serif;
-    margin-top:3px;opacity:.75;
+  .door .panelA,.door .panelB{
+    position:absolute;left:12%;width:76%;
+    background:var(--door-panel);border-radius:6px;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.35);
   }
-  .express:active{transform:scale(.985)}
+  .door .panelA{top:8%;height:34%}
+  .door .panelB{top:50%;height:40%}
+  .door .knob{
+    position:absolute;right:7%;top:52%;width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#F5D67B,#B98A2E);
+  }
+  .door .plate{
+    position:absolute;top:3%;left:50%;transform:translateX(-50%);
+    font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;
+    color:#C9D4E2;background:rgba(255,255,255,.08);
+    padding:5px 10px;border-radius:4px;white-space:nowrap;
+  }
+  .doorhint{text-align:center;color:var(--muted);font-size:13px;margin-bottom:22px}
 
-  /* Channel buttons */
-  #channels{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-  .divider{
-    font:500 11px/1 "IBM Plex Mono",monospace;
-    letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);margin:14px 0 0;
+  /* Post-its */
+  .sticky{
+    position:absolute;width:56px;height:56px;
+    background:var(--sticky);
+    box-shadow:0 4px 8px rgba(0,0,0,.28);
+    border:none;cursor:pointer;padding:6px 5px 0;
+    font:500 9px/1.3 "IBM Plex Mono",monospace;color:#5C4700;
+    text-align:left;overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% 82%,82% 100%,0 100%); /* folded corner */
   }
-  .channel{
-    display:flex;align-items:center;justify-content:space-between;
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px 18px;
-    color:var(--ink);text-decoration:none;
-  }
-  .channel:active{background:#EDF1F6}
-  .channel .name{font-weight:600;font-size:16px}
-  .channel .hint{color:var(--muted);font-size:13px;margin-top:2px}
-  .channel .arrow{color:var(--muted);font-size:18px;flex-shrink:0;margin-left:12px}
+  .sticky.new{animation:drop .35s ease-out}
+  @keyframes drop{from{transform:translateY(-14px) scale(1.1);opacity:0}}
+  .sticky:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 
-  footer{
-    margin-top:34px;padding-top:18px;
-    border-top:1px solid var(--line);
-    display:flex;justify-content:space-between;align-items:center;
-    font-size:13px;color:var(--muted);
+  /* Leave a note */
+  .cta{
+    display:block;width:100%;background:var(--amber);color:var(--ink);
+    border:none;border-radius:var(--radius);padding:17px 20px;
+    font:700 17px/1.2 "Space Grotesk",system-ui,sans-serif;text-align:center;cursor:pointer;
   }
+  .cta:active{transform:scale(.985)}
+  form{display:none;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:12px}
+  form.open{display:block}
+  label{display:block;font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  textarea,input[type=text]{
+    width:100%;border:1px solid var(--line);border-radius:8px;
+    padding:12px;font:16px/1.4 system-ui,sans-serif;color:var(--ink);background:var(--paper);
+  }
+  textarea{min-height:96px;resize:vertical;margin-bottom:12px}
+  input[type=text]{margin-bottom:12px}
+  .hp{position:absolute;left:-9999px;top:-9999px}  /* honeypot off-screen */
+  .send{width:100%;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:14px;font:600 16px "Space Grotesk",sans-serif;cursor:pointer}
+  .send[disabled]{opacity:.5}
+  .count{font-size:12px;color:var(--muted);text-align:right;margin:-6px 0 10px}
+  .flash{font-size:14px;margin-top:10px;color:var(--ink)}
+
+  /* Channels (compact row) */
+  .channels{display:flex;gap:8px;margin-top:22px}
+  .channels a{
+    flex:1;text-align:center;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:12px 4px;color:var(--ink);text-decoration:none;
+    font:600 13px "Space Grotesk",sans-serif;
+  }
+  .channels a:active{background:#EDF1F6}
+
+  dialog{
+    border:none;border-radius:var(--radius);padding:20px;max-width:340px;width:88vw;
+    box-shadow:0 24px 60px rgba(15,24,38,.35);
+  }
+  dialog::backdrop{background:rgba(15,24,38,.45)}
+  dialog .when{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+  dialog .msg{font-size:16px;white-space:pre-wrap;word-break:break-word}
+  dialog .close{margin-top:16px;width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;font:600 14px "Space Grotesk",sans-serif;cursor:pointer}
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
   footer a{color:var(--ink);font-weight:600;text-decoration:none}
-  a:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 </style>
 </head>
 <body>
 <main>
   <p class="eyebrow" id="room">Room 000 · IPAC</p>
-  <h1 id="name">Emmanuel</h1>
-  <p class="role" id="role">Not in? Leave a message below.</p>
+  <h1>You found my door.</h1>
 
-  <div class="status" id="status" hidden>
-    <div class="label"><span class="dot"></span>Status</div>
-    <div class="text" id="statusText"></div>
-    <div class="note" id="statusNote" hidden></div>
+  <div class="status" id="status">
+    <div class="row"><span class="dot"></span><span class="text" id="statusText"></span></div>
     <div class="age" id="statusAge"></div>
   </div>
 
-  <a class="express" id="express" href="#">
-    I stopped by
-    <small>One tap — opens a pre-filled email with the current time. Just hit send.</small>
-  </a>
+  <div class="doorwrap">
+    <div class="door" id="door" aria-label="Door with visitor notes">
+      <span class="plate" id="plate">EMMANUEL</span>
+      <div class="panelA"></div>
+      <div class="panelB"></div>
+      <div class="knob"></div>
+    </div>
+  </div>
+  <p class="doorhint" id="doorhint">Notes stick around for 30 days. Only I can read them.</p>
 
-  <p class="divider">Or pick a channel</p>
-  <div id="channels"></div>
+  <button class="cta" id="ctaBtn">Leave a note</button>
+
+  <form id="noteForm" autocomplete="off">
+    <label for="noteText">Your note</label>
+    <textarea id="noteText" maxlength="500" required placeholder="I stopped by about…"></textarea>
+    <div class="count"><span id="chars">0</span>/500</div>
+    <label for="noteName">Name (optional)</label>
+    <input type="text" id="noteName" maxlength="50" placeholder="Anonymous is fine">
+    <input type="text" class="hp" id="website" tabindex="-1" aria-hidden="true">
+    <button type="submit" class="send" id="sendBtn">Stick it on the door</button>
+    <p class="flash" id="flash" hidden></p>
+  </form>
+
+  <div class="channels">
+    <a id="chSlack" href="#" target="_blank" rel="noopener">Slack DM</a>
+    <a id="chMail" href="#">Email</a>
+    <a id="chMeet" href="#" target="_blank" rel="noopener">Book time</a>
+  </div>
 
   <footer>
-    <a id="vcard" href="contact.vcf" download>Save my contact</a>
+    <a href="contact.vcf" download>Save my contact</a>
     <span>Scanned from my door sign</span>
   </footer>
 </main>
 
+<dialog id="noteDialog">
+  <div class="when" id="dlgWhen"></div>
+  <div class="msg" id="dlgMsg"></div>
+  <button class="close" id="dlgClose">Close</button>
+</dialog>
+
 <script>
 // AIDEV-NOTE: single source of truth for personal links — edit here only.
 const CONFIG = {
-  name: "Emmanuel",                       // display name
-  room: "Room 000 · IPAC",                // door label
-  email: "YOUR_EMAIL@ipac.caltech.edu",   // work email
-  slackTeamId: "TXXXXXXXX",               // Slack workspace team ID
-  slackUserId: "UXXXXXXXX",               // your Slack member ID
-  schedulerUrl: "https://YOUR_SCHEDULER_LINK", // Zoom/Google appointment page
-  workHours: { start: 9, end: 17 }        // local hours when Slack ranks first
+  name: "EMMANUEL",
+  room: "Room 000 · IPAC",
+  apiBase: "https://doorsign.YOUR_SUBDOMAIN.workers.dev",
+  email: "YOUR_EMAIL@ipac.caltech.edu",
+  slackTeamId: "TXXXXXXXX",
+  slackUserId: "UXXXXXXXX",
+  schedulerUrl: "https://YOUR_SCHEDULER_LINK"
 };
 
-document.getElementById("name").textContent = CONFIG.name;
 document.getElementById("room").textContent = CONFIG.room;
+document.getElementById("plate").textContent = CONFIG.name;
+document.getElementById("chSlack").href =
+  `https://slack.com/app_redirect?team=${CONFIG.slackTeamId}&channel=${CONFIG.slackUserId}`;
+document.getElementById("chMail").href =
+  `mailto:${CONFIG.email}?subject=${encodeURIComponent("From your door sign")}`;
+document.getElementById("chMeet").href = CONFIG.schedulerUrl;
 
-// --- Express "I stopped by" mailto, time inserted at tap time ---
-document.getElementById("express").addEventListener("click", function (e) {
-  const now = new Date();
-  const t = now.toLocaleString(undefined, {
-    weekday: "short", hour: "2-digit", minute: "2-digit"
-  });
-  const subject = encodeURIComponent(`At your door — ${t}`);
-  const body = encodeURIComponent(
-    `Hi ${CONFIG.name},\n\nI stopped by your office at ${t}.\n\nMessage: \n\n— `
-  );
-  this.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
+// Admin mode: open the page as https://.../#admin=YOUR_ADMIN_KEY (bookmark it).
+// Key lives in the fragment (never sent to servers) and in memory only.
+const adminKey = (location.hash.match(/admin=([^&]+)/) || [])[1] || null;
+if (adminKey) document.getElementById("doorhint").textContent =
+  "Admin mode — tap a note to read it.";
+
+// --- Deterministic sticky placement from id, stable across reloads ---
+function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h}
+function place(el,id){
+  const h1=hash(id), h2=hash(id+"x");
+  el.style.left=(8+(h1%58))+"%";
+  el.style.top=(10+(h2%62))+"%";
+  el.style.transform=`rotate(${(h1%13)-6}deg)`;
+}
+function ago(ts){
+  const m=Math.round((Date.now()-ts)/60000);
+  if(m<60)return `${m} min ago`;
+  if(m<1440)return `${Math.round(m/60)} h ago`;
+  return `${Math.round(m/1440)} d ago`;
+}
+
+const dlg=document.getElementById("noteDialog");
+document.getElementById("dlgClose").onclick=()=>dlg.close();
+
+function addSticky(note,isNew){
+  const b=document.createElement("button");
+  b.className="sticky"+(isNew?" new":"");
+  b.textContent=ago(note.ts);
+  b.setAttribute("aria-label",`Note left ${ago(note.ts)}`);
+  place(b,note.id);
+  b.onclick=()=>{
+    document.getElementById("dlgWhen").textContent=
+      new Date(note.ts).toLocaleString()+(note.name?` — ${note.name}`:"");
+    document.getElementById("dlgMsg").textContent=
+      note.text || "A note was left here. Only Emmanuel can read it.";
+    dlg.showModal();
+  };
+  document.getElementById("door").appendChild(b);
+}
+
+async function loadNotes(){
+  try{
+    const headers=adminKey?{Authorization:`Bearer ${adminKey}`}:{};
+    const r=await fetch(`${CONFIG.apiBase}/messages`,{headers});
+    if(!r.ok)return;
+    (await r.json()).forEach(n=>addSticky(n,false));
+  }catch(e){ /* worker down — door just shows empty */ }
+}
+loadNotes();
+
+// --- Leave a note ---
+const form=document.getElementById("noteForm");
+const flash=document.getElementById("flash");
+document.getElementById("ctaBtn").onclick=()=>{
+  form.classList.toggle("open");
+  if(form.classList.contains("open"))document.getElementById("noteText").focus();
+};
+document.getElementById("noteText").addEventListener("input",e=>{
+  document.getElementById("chars").textContent=e.target.value.length;
 });
-
-// --- Channels, reordered by time of day ---
-const channels = [
-  {
-    id: "slack",
-    name: "Slack DM",
-    hint: "Fastest during work hours (IPAC workspace)",
-    href: `https://slack.com/app_redirect?team=${CONFIG.slackTeamId}&channel=${CONFIG.slackUserId}`
-  },
-  {
-    id: "email",
-    name: "Email",
-    hint: "Anything longer, or if you don't use Slack",
-    href: `mailto:${CONFIG.email}?subject=${encodeURIComponent("From your door sign")}`
-  },
-  {
-    id: "meet",
-    name: "Book a meeting",
-    hint: "Pick a slot on my calendar",
-    href: CONFIG.schedulerUrl
-  }
-];
-
-const h = new Date().getHours();
-const d = new Date().getDay();
-const workNow = d >= 1 && d <= 5 && h >= CONFIG.workHours.start && h < CONFIG.workHours.end;
-// AIDEV-NOTE: outside work hours, email outranks Slack (visitor likely external / I won't see Slack)
-if (!workNow) channels.sort((a, b) => (a.id === "email" ? -1 : b.id === "email" ? 1 : 0));
-
-document.getElementById("channels").innerHTML = channels.map(c => `
-  <a class="channel" href="${c.href}" target="_blank" rel="noopener">
-    <span><span class="name">${c.name}</span><br><span class="hint">${c.hint}</span></span>
-    <span class="arrow">→</span>
-  </a>`).join("");
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=document.getElementById("sendBtn");
+  btn.disabled=true;flash.hidden=true;
+  try{
+    const r=await fetch(`${CONFIG.apiBase}/messages`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        text:document.getElementById("noteText").value,
+        name:document.getElementById("noteName").value,
+        website:document.getElementById("website").value  // honeypot
+      })
+    });
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||"failed");
+    addSticky({id:data.id,ts:Date.now()},true);
+    form.reset();form.classList.remove("open");
+    document.getElementById("chars").textContent="0";
+    flash.textContent="Stuck on the door. Emmanuel gets a ping on Slack.";
+    flash.hidden=false;
+  }catch(err){
+    flash.textContent=`Couldn't post the note: ${err.message}. Try email below.`;
+    flash.hidden=false;
+  }finally{btn.disabled=false;}
+});
 
 // --- Live status from status.json (same origin, cache-busted) ---
 fetch(`status.json?t=${Date.now()}`)
-  .then(r => (r.ok ? r.json() : Promise.reject()))
-  .then(s => {
-    if (!s.status) return;
-    document.getElementById("statusText").textContent = s.status;
-    if (s.note) {
-      const n = document.getElementById("statusNote");
-      n.textContent = s.note;
-      n.hidden = false;
-    }
-    if (s.updated) {
-      const mins = Math.round((Date.now() - new Date(s.updated)) / 60000);
-      const age = mins < 60 ? `${mins} min ago`
-        : mins < 1440 ? `${Math.round(mins / 60)} h ago`
-        : `${Math.round(mins / 1440)} d ago`;
-      document.getElementById("statusAge").textContent = `updated ${age}`;
-    }
-    document.getElementById("status").hidden = false;
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(s=>{
+    if(!s.status)return;
+    document.getElementById("statusText").textContent=s.status+(s.note?` — ${s.note}`:"");
+    if(s.updated)document.getElementById("statusAge").textContent=
+      `updated ${ago(new Date(s.updated).getTime())}`;
+    document.getElementById("status").classList.add("on");
   })
-  .catch(() => { /* no status file — strip stays hidden */ });
+  .catch(()=>{});
 </script>
 </body>
 </html>
