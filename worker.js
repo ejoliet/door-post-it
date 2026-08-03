@@ -17,7 +17,7 @@ export default {
   async fetch(req, env) {
     const cors = {
       "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN,
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
     const json = (obj, status = 200) =>
@@ -80,6 +80,24 @@ export default {
       }
 
       return json({ ok: true, id });
+    }
+
+    // ---------- DELETE: admin wipes all notes ----------
+    if (req.method === "DELETE") {
+      const isAdmin =
+        req.headers.get("Authorization") === `Bearer ${env.ADMIN_KEY}`;
+      if (!isAdmin) return json({ error: "unauthorized" }, 401);
+
+      let deleted = 0;
+      let cursor;
+      do {
+        const page = await env.NOTES.list({ prefix: "msg:", cursor });
+        await Promise.all(page.keys.map((k) => env.NOTES.delete(k.name)));
+        deleted += page.keys.length;
+        cursor = page.list_complete ? undefined : page.cursor;
+      } while (cursor);
+
+      return json({ ok: true, deleted });
     }
 
     // ---------- GET: list notes ----------
