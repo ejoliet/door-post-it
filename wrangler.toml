@@ -5,12 +5,12 @@ compatibility_date = "2026-07-01"
 # Create with: wrangler kv namespace create NOTES
 # then paste the returned id below.
 kv_namespaces = [
-  { binding = "NOTES", id = "PASTE_KV_NAMESPACE_ID" }
+  { binding = "NOTES", id = "5950d756f55144369da2bb7615c36335" }
 ]
 
 [vars]
 # Your GitHub Pages origin — no trailing slash, no path.
-ALLOWED_ORIGIN = "https://YOUR_USERNAME.github.io"
+ALLOWED_ORIGIN = "https://ejoliet.github.io"
 
 # Secrets (never in this file):
 #   wrangler secret put SLACK_WEBHOOK_URL
