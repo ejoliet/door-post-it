@@ -84,6 +84,23 @@
   @keyframes drop{from{transform:translateY(-14px) scale(1.1);opacity:0}}
   .sticky:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 
+  /* Age buckets: yellow = fresh, orange = this week, pink = older */
+  .sticky.b-today{background:#FFD34D;color:#5C4700}
+  .sticky.b-week{background:#FFA45C;color:#5A2E00}
+  .sticky.b-old{background:#FF9EC4;color:#5E1236}
+  .sticky.dim{opacity:.15;pointer-events:none}
+
+  /* Legend + filter chips */
+  .legend{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:-8px 0 16px}
+  .legend button{
+    display:flex;align-items:center;gap:6px;
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:6px 12px;cursor:pointer;
+    font:500 12px "IBM Plex Mono",monospace;color:var(--ink);
+  }
+  .legend .sw{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .legend button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
   /* Leave a note */
   .cta{
     display:block;width:100%;background:var(--amber);color:var(--ink);
@@ -148,6 +165,8 @@
   </div>
   <p class="doorhint" id="doorhint">Notes stick around for 30 days. Only I can read them.</p>
 
+  <div class="legend" id="legend" aria-label="Filter notes by age"></div>
+
   <button class="cta" id="ctaBtn">Leave a note</button>
 
   <form id="noteForm" autocomplete="off">
@@ -182,13 +201,13 @@
 <script>
 // AIDEV-NOTE: single source of truth for personal links — edit here only.
 const CONFIG = {
-  name: "Emmanuel",
-  room: "Room KS-370C · IPAC",
-  apiBase: "https://doorsign.ejoliet.workers.dev",
-  email: "ejbox@caltech.edu",
-  slackTeamId: "T2VQT0TB2",
-  slackUserId: "U2YP121GE",
-  schedulerUrl: "https://scheduler.zoom.us/emmanuel-joliet/schedule-meeting-with-me"
+  name: "EMMANUEL",
+  room: "Room 000 · IPAC",
+  apiBase: "https://doorsign.YOUR_SUBDOMAIN.workers.dev",
+  email: "YOUR_EMAIL@ipac.caltech.edu",
+  slackTeamId: "TXXXXXXXX",
+  slackUserId: "UXXXXXXXX",
+  schedulerUrl: "https://YOUR_SCHEDULER_LINK"
 };
 
 document.getElementById("room").textContent = CONFIG.room;
@@ -223,9 +242,45 @@ function ago(ts){
 const dlg=document.getElementById("noteDialog");
 document.getElementById("dlgClose").onclick=()=>dlg.close();
 
+// --- Age buckets: sticky color encodes freshness ---
+const BUCKETS=[
+  {id:"today",label:"< 1 day",color:"#FFD34D"},
+  {id:"week", label:"1\u20137 days",color:"#FFA45C"},
+  {id:"old",  label:"> 7 days",color:"#FF9EC4"}
+];
+function bucketOf(ts){
+  const d=(Date.now()-ts)/86400000;
+  return d<1?"today":d<7?"week":"old";
+}
+let activeBucket=null;
+const counts={today:0,week:0,old:0};
+
+function renderLegend(){
+  const el=document.getElementById("legend");
+  el.innerHTML="";
+  BUCKETS.forEach(bk=>{
+    const btn=document.createElement("button");
+    btn.setAttribute("aria-pressed",String(activeBucket===bk.id));
+    btn.innerHTML=`<span class="sw" style="background:${bk.color}"></span>${bk.label} (${counts[bk.id]})`;
+    btn.onclick=()=>{
+      activeBucket=activeBucket===bk.id?null:bk.id;   // tap again to clear
+      applyFilter();renderLegend();
+    };
+    el.appendChild(btn);
+  });
+}
+function applyFilter(){
+  document.querySelectorAll(".sticky").forEach(s=>{
+    s.classList.toggle("dim",activeBucket!==null&&s.dataset.bucket!==activeBucket);
+  });
+}
+
 function addSticky(note,isNew){
   const b=document.createElement("button");
-  b.className="sticky"+(isNew?" new":"");
+  const bk=bucketOf(note.ts);
+  b.className=`sticky b-${bk}`+(isNew?" new":"");
+  b.dataset.bucket=bk;
+  counts[bk]++;
   b.textContent=ago(note.ts);
   b.setAttribute("aria-label",`Note left ${ago(note.ts)}`);
   place(b,note.id);
@@ -246,7 +301,9 @@ async function loadNotes(){
     if(!r.ok)return;
     (await r.json()).forEach(n=>addSticky(n,false));
   }catch(e){ /* worker down — door just shows empty */ }
+  renderLegend();
 }
+renderLegend();
 loadNotes();
 
 // --- Leave a note ---
@@ -276,6 +333,7 @@ form.addEventListener("submit",async e=>{
     const data=await r.json();
     if(!r.ok)throw new Error(data.error||"failed");
     addSticky({id:data.id,ts:Date.now()},true);
+    renderLegend();applyFilter();
     form.reset();form.classList.remove("open");
     document.getElementById("chars").textContent="0";
     flash.textContent="Stuck on the door. Emmanuel gets a ping on Slack.";
