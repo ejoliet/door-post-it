@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Joliet;Emmanuel;;;
+FN:Emmanuel Joliet — Caltech/IPAC
+ORG:Caltech/IPAC
+TITLE:Lead Engineer
+TEL;TYPE=CELL:6267338494
+EMAIL;TYPE=WORK:ejbox@caltech.edu
+URL;TYPE=WORK:https://www.ipac.caltech.edu/staff/emmanuel-joliet
+URL;TYPE=LinkedIn:https://www.linkedin.com/in/ejoliet
+END:VCARD
